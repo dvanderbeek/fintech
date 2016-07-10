@@ -1,5 +1,3 @@
-require 'benchmark'
-
 module Fintech
   class Benchmark
     def self.run
