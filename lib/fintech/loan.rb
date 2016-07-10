@@ -38,7 +38,7 @@ module Fintech
           standard_payment_cents: payment_cents,
           final: date == installment_dates.last,
         )
-      end[1..-1]
+      end.drop(1)
     end
 
     def payments
@@ -75,7 +75,7 @@ module Fintech
           payments: payments.select { |p| p.date == date },
           fees_assessed: 0,
         )
-      end[1..-1]
+      end.drop(1)
     end
 
     def inspect
