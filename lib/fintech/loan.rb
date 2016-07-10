@@ -41,14 +41,43 @@ module Fintech
       end[1..-1]
     end
 
+    def daily_stats
+      cached_installments = installments
+      (funding_date..installment_dates.last).each_with_object([seed_stat]) do |date, array|
+        array.push Stat.new(
+          date: date,
+          previous: array.last,
+          rate: rate,
+          installment: cached_installments.find { |i| i.end_date == date },
+          fees_assessed: 0,
+        )
+      end[1..-1]
+    end
+
     def inspect
       "<Fintech::Loan amount_cents: #{amount_cents}, rate: #{rate.annual}, term: #{term}, funding_date: #{funding_date}>"
     end
 
     private
 
+    def seed_stat
+      OpenStruct.new(
+        ending_balance: amount_cents,
+        total_principal_due: 0,
+        total_principal_paid: 0,
+        total_interest_paid: 0,
+        total_interest_income: 0,
+        ending_interest: 0,
+        ending_fees: 0,
+      )
+    end
+
     def seed_installment
-      OpenStruct.new(ending_balance: amount_cents, ending_interest: 0, end_date: funding_date)
+      OpenStruct.new(
+        ending_balance: amount_cents,
+        ending_interest: 0,
+        end_date: funding_date
+      )
     end
   end
 end
