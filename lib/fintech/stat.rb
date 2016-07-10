@@ -6,6 +6,13 @@ module Fintech
       attrs.each { |k, v| send("#{k}=", v) if respond_to?("#{k}=") }
     end
 
+    # TODO: Refine payment handling:
+    #   for the past, use payments
+    #   assume future installments will be paid
+    #   adjust to prevent overpayment
+    #   extend to cover remaining balance
+    #   apply to future installments
+
     def payment_cents
       @payment_cents ||= payments.any? ? payments.map(&:amount_cents).reduce(:+) : 0
     end
@@ -83,6 +90,10 @@ module Fintech
 
     def ending_fees
       @ending_fees ||= beginning_fees + fees_assessed - fees_paid
+    end
+
+    def accounts_receivable
+      @accounts_receivable ||= principal_receivable + interest_receivable
     end
 
     def inspect
