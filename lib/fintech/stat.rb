@@ -6,15 +6,51 @@ module Fintech
       attrs.each { |k, v| send("#{k}=", v) if respond_to?("#{k}=") }
     end
 
-    # TODO: Refine payment handling:
-    #   for the past, use payments
-    #   assume future installments will be paid
-    #   adjust to prevent overpayment
-    #   extend to cover remaining balance
-    #   apply to future installments
+    def scheduled_payment_cents
+      @scheduled_payment_cents ||= if payments.any?
+        [
+          payments.map(&:amount_cents).reduce(:+),
+          previous.ending_balance +
+            previous.ending_interest +
+            previous.ending_fees +
+            fees_assessed
+        ].min.truncate
+      else
+        0
+      end
+    end
 
     def payment_cents
-      @payment_cents ||= payments.any? ? payments.map(&:amount_cents).reduce(:+) : 0
+      @payment_cents ||= scheduled_payment_cents - apply_to_future_credits_applied
+    end
+
+    def payment_dollars
+      @payment_dollars ||= payment_cents / 100.0
+    end
+
+    # apply to future
+    def beginning_apply_to_future_credits
+      @beginning_apply_to_future_credits ||= previous.ending_apply_to_future_credits
+    end
+
+    def apply_to_future_credits_earned
+      @apply_to_future_credits_earned ||= payments.inject(0) do |memo, payment|
+        memo += (payment.apply_to_future ? payment.amount_cents : 0)
+      end
+    end
+
+    def apply_to_future_credits_applied
+      @apply_to_future_credits_applied ||= if installment
+        [scheduled_payment_cents, beginning_apply_to_future_credits].min
+      else
+        0
+      end
+    end
+
+    def ending_apply_to_future_credits
+      @ending_apply_to_future_credits ||= beginning_apply_to_future_credits +
+                                          apply_to_future_credits_earned -
+                                          apply_to_future_credits_applied
     end
 
     # principal
@@ -68,7 +104,11 @@ module Fintech
     end
 
     def total_interest_due
-      @total_interest_due ||= installment ? previous.total_interest_income : previous.total_interest_due
+      @total_interest_due ||= if installment
+        previous.total_interest_income
+      else
+        previous.total_interest_due
+      end
     end
 
     def total_interest_paid
@@ -97,7 +137,7 @@ module Fintech
     end
 
     def inspect
-      "<Fintech::Stat ending_balance: #{ending_balance}>"
+      "<Fintech::Stat date: #{date}, ending_balance: #{ending_balance.truncate}>"
     end
   end
 end

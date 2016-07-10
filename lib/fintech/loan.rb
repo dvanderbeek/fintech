@@ -7,7 +7,6 @@ module Fintech
       self.rate = attrs.fetch(:rate, 0)
       self.funding_date = attrs.fetch(:funding_date, Date.today)
       self.term = attrs.fetch(:term, 12)
-      @installments_paid = false
     end
 
     def rate=(rate)
@@ -23,13 +22,13 @@ module Fintech
     end
 
     def installment_dates
-      @installment_dates = (1..term).map do |n|
+      @installment_dates ||= (1..term).map do |n|
         funding_date.next_month(n)
       end
     end
 
     def installments
-      @installments = installment_dates.each_with_object([seed_installment]) do |date, array|
+      @installments ||= installment_dates.each_with_object([seed_installment]) do |date, array|
         array.push Installment.new(
           beginning_balance: array.last.ending_balance,
           beginning_interest: array.last.ending_interest,
@@ -47,14 +46,13 @@ module Fintech
     end
 
     def pay_installments
-      unless @installments_paid
-        installments.each do |installment, hash|
-          add_payment(
-            date: installment.end_date,
-            amount_cents: installment.payment_cents
-          )
-        end
-        @installments_paid = true
+      installments.each do |installment, hash|
+        next if installment.paid
+        add_payment(
+          date: installment.end_date,
+          amount_cents: installment.payment_cents
+        )
+        installment.paid = true
       end
     end
 
@@ -67,13 +65,13 @@ module Fintech
     end
 
     def daily_stats
-      cached_installments = installments
+      # TODO: extend schedule to cover remaining balance (if any)
       (funding_date..installment_dates.last).each_with_object([seed_stat]) do |date, array|
         array.push Stat.new(
           date: date,
           previous: array.last,
           rate: rate,
-          installment: cached_installments.find { |i| i.end_date == date },
+          installment: installments.find { |i| i.end_date == date },
           payments: payments.select { |p| p.date == date },
           fees_assessed: 0,
         )
@@ -96,6 +94,7 @@ module Fintech
         total_interest_due: 0,
         ending_interest: 0,
         ending_fees: 0,
+        ending_apply_to_future_credits: 0,
       )
     end
 
