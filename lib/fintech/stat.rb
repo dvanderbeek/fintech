@@ -1,15 +1,13 @@
 module Fintech
   class Stat
-    attr_accessor :date, :previous, :rate, :installment, :fees_assessed
+    attr_accessor :date, :previous, :rate, :installment, :payments, :fees_assessed
 
     def initialize(attrs = {})
       attrs.each { |k, v| send("#{k}=", v) if respond_to?("#{k}=") }
     end
 
     def payment_cents
-      # TODO: Separate payments from installments
-      #   and handle apply to future setting
-      installment ? installment.payment_cents : 0
+      @payment_cents ||= payments.any? ? payments.map(&:amount_cents).reduce(:+) : 0
     end
 
     # principal

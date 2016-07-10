@@ -7,6 +7,7 @@ module Fintech
       self.rate = attrs.fetch(:rate, 0)
       self.funding_date = attrs.fetch(:funding_date, Date.today)
       self.term = attrs.fetch(:term, 12)
+      @installments_paid = false
     end
 
     def rate=(rate)
@@ -41,6 +42,30 @@ module Fintech
       end[1..-1]
     end
 
+    def payments
+      @payments ||= []
+    end
+
+    def pay_installments
+      unless @installments_paid
+        installments.each do |installment, hash|
+          add_payment(
+            date: installment.end_date,
+            amount_cents: installment.payment_cents
+          )
+        end
+        @installments_paid = true
+      end
+    end
+
+    def add_payment(date:, amount_cents:, apply_to_future: false)
+      payments.push Payment.new(
+        date: date,
+        amount_cents: amount_cents,
+        apply_to_future: apply_to_future
+      )
+    end
+
     def daily_stats
       cached_installments = installments
       (funding_date..installment_dates.last).each_with_object([seed_stat]) do |date, array|
@@ -49,6 +74,7 @@ module Fintech
           previous: array.last,
           rate: rate,
           installment: cached_installments.find { |i| i.end_date == date },
+          payments: payments.select { |p| p.date == date },
           fees_assessed: 0,
         )
       end[1..-1]
