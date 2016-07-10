@@ -1,6 +1,8 @@
 module Fintech
   class Installment
-    attr_accessor :start_date, :end_date, :beginning_balance, :beginning_interest, :rate, :standard_payment_cents, :final, :paid
+    attr_accessor :start_date, :end_date, :beginning_balance,
+                  :beginning_interest, :rate, :standard_payment_cents,
+                  :final, :paid
 
     def initialize(attrs = {})
       attrs.each { |k, v| send("#{k}=", v) if respond_to?("#{k}=") }

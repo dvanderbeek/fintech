@@ -18,7 +18,7 @@ module Fintech
     end
 
     def payment_dollars
-      payment_cents.to_f / 100
+      payment_cents / 100.0
     end
 
     def installment_dates
@@ -65,7 +65,7 @@ module Fintech
     end
 
     def daily_stats
-      # TODO: extend schedule to cover remaining balance (if any)
+      # TODO: extend to cover remaining balance (if any)
       (funding_date..installment_dates.last).each_with_object([seed_stat]) do |date, array|
         array.push Stat.new(
           date: date,

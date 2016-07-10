@@ -8,13 +8,7 @@ module Fintech
 
     def scheduled_payment_cents
       @scheduled_payment_cents ||= if payments.any?
-        [
-          payments.map(&:amount_cents).reduce(:+),
-          previous.ending_balance +
-            previous.ending_interest +
-            previous.ending_fees +
-            fees_assessed
-        ].min.truncate
+        [payments.map(&:amount_cents).reduce(:+), remaining_balance].min.truncate
       else
         0
       end
@@ -26,6 +20,11 @@ module Fintech
 
     def payment_dollars
       @payment_dollars ||= payment_cents / 100.0
+    end
+
+    def remaining_balance
+      @remaining_balance ||= beginning_balance + beginning_interest +
+                             beginning_fees + fees_assessed
     end
 
     # apply to future
@@ -125,7 +124,7 @@ module Fintech
     end
 
     def fees_paid
-      @fees_paid ||= [[beginning_fees, payment_cents].min, 0].max
+      @fees_paid ||= [[beginning_fees + fees_assessed, payment_cents].min, 0].max
     end
 
     def ending_fees
