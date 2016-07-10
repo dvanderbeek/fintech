@@ -67,6 +67,7 @@ module Fintech
         total_principal_paid: 0,
         total_interest_paid: 0,
         total_interest_income: 0,
+        total_interest_due: 0,
         ending_interest: 0,
         ending_fees: 0,
       )
@@ -74,9 +75,9 @@ module Fintech
 
     def seed_installment
       OpenStruct.new(
+        end_date: funding_date,
         ending_balance: amount_cents,
         ending_interest: 0,
-        end_date: funding_date
       )
     end
   end

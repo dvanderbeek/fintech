@@ -7,6 +7,8 @@ module Fintech
     end
 
     def payment_cents
+      # TODO: Separate payments from installments
+      #   and handle apply to future setting
       installment ? installment.payment_cents : 0
     end
 
@@ -60,8 +62,16 @@ module Fintech
       @total_interest_income ||= previous.total_interest_income + interest_accrued
     end
 
+    def total_interest_due
+      @total_interest_due ||= installment ? previous.total_interest_income : previous.total_interest_due
+    end
+
     def total_interest_paid
       @total_interest_paid ||= previous.total_interest_paid + interest_paid
+    end
+
+    def interest_receivable
+      @interest_receivable ||= total_interest_due - total_interest_paid
     end
 
     # fees
