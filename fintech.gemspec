@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["David Van Der Beek"]
   spec.email         = ["earlynovrock@gmail.com"]
 
-  spec.summary       = %q{Financial Calculations}
-  spec.description   = %q{Financial Calculations}
+  spec.summary       = %q{Financial calculation library}
+  spec.description   = %q{Financial calculation library}
   spec.homepage      = "https://www.github.com/dvanderbeek/fintech"
   spec.license       = "MIT"
 
@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec"
+  spec.add_development_dependency "pry"
 end
