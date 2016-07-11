@@ -86,7 +86,7 @@ module Fintech
 
     def seed_stat
       OpenStruct.new(
-        ending_balance: amount_cents,
+        ending_principal: amount_cents,
         total_principal_due: 0,
         total_principal_paid: 0,
         total_interest_paid: 0,

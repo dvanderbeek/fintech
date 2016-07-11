@@ -23,7 +23,7 @@ module Fintech
     end
 
     def remaining_balance
-      @remaining_balance ||= beginning_balance + beginning_interest +
+      @remaining_balance ||= beginning_principal + beginning_interest +
                              beginning_fees + fees_assessed
     end
 
@@ -53,12 +53,12 @@ module Fintech
     end
 
     # principal
-    def beginning_balance
-      @beginning_balance ||= previous.ending_balance
+    def beginning_principal
+      @beginning_principal ||= previous.ending_principal
     end
 
-    def ending_balance
-      @ending_balance ||= beginning_balance - principal
+    def ending_principal
+      @ending_principal ||= beginning_principal - principal
     end
 
     def principal
@@ -91,7 +91,7 @@ module Fintech
     end
 
     def interest_accrued
-      @interest_accrued ||= [ending_balance, 0].max * rate.daily
+      @interest_accrued ||= [ending_principal, 0].max * rate.daily
     end
 
     def ending_interest
@@ -136,7 +136,7 @@ module Fintech
     end
 
     def inspect
-      "<Fintech::Stat date: #{date}, ending_balance: #{ending_balance.truncate}>"
+      "<Fintech::Stat date: #{date}, ending_principal: #{ending_principal.truncate}>"
     end
   end
 end
