@@ -1,7 +1,7 @@
 module Fintech
   class Benchmark
     def self.run
-      "Time take n: #{(time * 1000).round(2)} milliseconds; Ending Balance: #{@stats.last.ending_balance.round(2)} cents."
+      "Time take n: #{(time * 1000).round(2)} milliseconds; Ending Balance: #{@stats.last.ending_principal.round(2)} cents."
     end
 
     def self.time
